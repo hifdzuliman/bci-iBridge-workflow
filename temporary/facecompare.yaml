@@ -12,16 +12,17 @@ startEvent:
 serviceTask:
   face_compare:
     type: worker
+    sourceRefParsing: ${{ibridge.httprequest}}
     sourceRef: 
-      - startEvent
+      locale: ${{startEvent.Locale}}
+      body: ${{startEvent.Body}}
     targetRef: 
-    - ibridge-reply
-    retry: 0
-    worker : ibridge-middleware
+      - ibridge-reply
+    worker: ibridge-middleware
    
   ibridge-reply:
+    endParsing: Merged
     sourceRef: 
-      - startEvent
-      - face_compare
+      - ${{face_compare}}
     type: endEvent
     taskRef: ibridge-reply

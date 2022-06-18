@@ -2,19 +2,19 @@
 #
 #
 
-name: registration_step
-requestType: registration_step
-path: /ibridge/custom/registration/step
-method: POST
-startEvent:
-  targetRef: create_ipassport
+  name: send_otp
+  requestType: send_otp
+  path: /ibridge/custom/otp/send
+  method: POST
+  startEvent:
+    targetRef: check_duplicate_phone
 
-serviceTask:
-    create_ipassport:
+  serviceTask:
+    check_duplicate_phone:
       type: worker
       sourceRefParsing: ${{ibridge.httprequest}}
       sourceRef: 
-        authorization: ${{startEvent.Authorization}}
+        locale: ${{startEvent.Locale}}
         body: ${{startEvent.Body}}
       targetRef: 
         - condition_0
@@ -24,19 +24,20 @@ serviceTask:
       type: conditional
       condition: 
         variableCheck: 
-          - ${{create_ipassport.message}}
+          - ${{check_duplicate_phone.message}}
         value:
           - case:
             - Success
-            target: registration_by_step
+            target: send_otp
       defaultTasK: ibridge-reply
 
-    registration_by_step:
+    send_otp:
       type: worker
       sourceRefParsing: ${{ibridge.httprequest}}
       sourceRef: 
-        authorization: ${{startEvent.Authorization}}
-        body: ${{create_ipassport.data}}
+        locale: ${{startEvent.Locale}}
+        body: 
+          - ${{check_duplicate_phone.data}}
       targetRef: 
         - ibridge-reply
       worker : kyc
@@ -44,6 +45,6 @@ serviceTask:
     ibridge-reply:
       endParsing: Merged
       sourceRef: 
-        - ${{registration_by_step}}
+        - ${{send_otp}}
       type: endEvent
       taskRef: ibridge-reply

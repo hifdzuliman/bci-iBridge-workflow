@@ -14,6 +14,7 @@
       type: worker
       sourceRefParsing: ${{ibridge.httprequest}}
       sourceRef: 
+        locale: ${{startEvent.Locale}}
         body: ${{startEvent.Body}}
       targetRef: 
         - condition_0
@@ -34,8 +35,8 @@
       type: worker
       sourceRefParsing: ${{ibridge.httprequest}}
       sourceRef: 
-        body: 
-          - ${{check_duplicate_nik.data}}
+        locale: ${{startEvent.Locale}}
+        body: ${{check_duplicate_nik.data}}
       targetRef: 
         - condition_1
       worker : ibridge-middleware
@@ -55,8 +56,8 @@
       type: worker
       sourceRefParsing: ${{ibridge.httprequest}}
       sourceRef: 
-        body: 
-          - ${{face_compare.data}}
+        locale: ${{startEvent.Locale}}
+        body: ${{face_compare.data}}
       targetRef: 
         - condition_2
       worker : ibridge-middleware
@@ -76,8 +77,8 @@
       type: worker
       sourceRefParsing: ${{ibridge.httprequest}}
       sourceRef: 
-        body: 
-          - ${{check_high_risk.data}}
+        locale: ${{startEvent.Locale}}
+        body: ${{check_high_risk.data}}
       targetRef: 
         - condition_3
       worker : ibridge-middleware
@@ -97,8 +98,8 @@
       type: worker
       sourceRefParsing: ${{ibridge.httprequest}}
       sourceRef: 
-        body: 
-          - ${{check_dukcapil.data}}
+        locale: ${{startEvent.Locale}}
+        body: ${{check_dukcapil.data}}
       targetRef: 
         - ibridge-reply
       worker : kyc

@@ -14,7 +14,8 @@ serviceTask:
     type: worker
     sourceRefParsing: ${{ibridge.httprequest}}
     sourceRef: 
-      - startEvent
+      locale: ${{startEvent.Locale}}
+      body: ${{startEvent.Body}}
     targetRef: 
     - ibridge-reply
     retry: 0
@@ -22,7 +23,6 @@ serviceTask:
    
   ibridge-reply:
     sourceRef: 
-      - startEvent
-      - get_aai_license
+      - ${{get_aai_license}}
     type: endEvent
     taskRef: ibridge-reply

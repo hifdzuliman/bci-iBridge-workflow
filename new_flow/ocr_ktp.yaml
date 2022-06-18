@@ -14,6 +14,8 @@ serviceTask:
     type: worker
     sourceRefParsing: ${{ibridge.httprequest}}
     sourceRef: 
+      locale:
+        - ${{startEvent.Locale}}
       formFile:
         - ${{startEvent.FormFile.ocr_ktp}}
       formValue:
@@ -37,10 +39,9 @@ serviceTask:
     type: worker
     sourceRefParsing: ${{ibridge.httprequest}}
     sourceRef: 
-      formFile:
-        - ${{startEvent.FormFile.ocr_ktp}}
-      formValue:
-        - ${{startEvent.FormValue.ocr_ktp}}
+      locale: ${{startEvent.Locale}}
+      formFile: ${{startEvent.FormFile.ocr_ktp}}
+      formValue: ${{startEvent.FormValue.ocr_ktp}}
     targetRef: 
     - condition_1
     worker : ibridge-middleware
@@ -60,10 +61,9 @@ serviceTask:
     type: worker
     sourceRefParsing: ${{ibridge.httprequest}}
     sourceRef: 
-      formFile:
-        - ${{startEvent.FormFile.ocr_ktp}}
-      formValue:
-        - ${{startEvent.FormValue.ocr_ktp}}
+      locale: ${{startEvent.Locale}}
+      formFile: ${{startEvent.FormFile.ocr_ktp}}
+      formValue: ${{startEvent.FormValue.ocr_ktp}}
     targetRef: 
     - ibridge-reply
     worker : custom_worker

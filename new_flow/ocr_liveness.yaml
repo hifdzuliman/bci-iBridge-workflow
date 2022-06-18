@@ -14,6 +14,7 @@ serviceTask:
     type: worker
     sourceRefParsing: ${{ibridge.httprequest}}
     sourceRef: 
+      locale: ${{startEvent.Locale}}
       body: ${{startEvent.Body}}
     targetRef: 
       - ibridge-reply

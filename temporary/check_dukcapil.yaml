@@ -12,16 +12,17 @@ startEvent:
 serviceTask:
   check_dukcapil:
     type: worker
+    sourceRefParsing: ${{ibridge.httprequest}}
     sourceRef: 
-      - startEvent
+      locale: ${{startEvent.Locale}}
+      body: ${{startEvent.Body}}
     targetRef: 
-    - ibridge-reply
-    retry: 0
-    worker : ibridge-middleware
+      - ibridge-reply
+    worker: ibridge-middleware
    
   ibridge-reply:
+    endParsing: Merged
     sourceRef: 
-      - startEvent
-      - check_dukcapil
+      - ${{check_dukcapil}}
     type: endEvent
     taskRef: ibridge-reply

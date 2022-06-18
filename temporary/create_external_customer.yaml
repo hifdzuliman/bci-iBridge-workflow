@@ -2,15 +2,15 @@
 #
 #
 
-name: check_ipassport
-requestType: check_ipassport
-path: /ibridge/middleware/ipassport/check
+name: create_external_registration
+requestType: create_external_registration
+path: /ibridge/middleware/customer/external/create
 method: POST
 startEvent:
-  targetRef: check_ipassport
+  targetRef: create_external_customer
 
-serviceTask:
-  check_ipassport:
+serviceTask:  
+  create_external_customer:
     type: worker
     sourceRefParsing: ${{ibridge.httprequest}}
     sourceRef: 
@@ -23,6 +23,6 @@ serviceTask:
   ibridge-reply:
     endParsing: Merged
     sourceRef: 
-      - ${{check_ipassport}}
+      - ${{create_external_customer}}
     type: endEvent
     taskRef: ibridge-reply
