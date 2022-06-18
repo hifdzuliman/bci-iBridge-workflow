@@ -1,0 +1,49 @@
+#
+#
+#
+
+name: registration_step
+requestType: registration_step
+path: /ibridge/custom/registration/step
+method: POST
+startEvent:
+  targetRef: create_ipassport
+
+serviceTask:
+    create_ipassport:
+      type: worker
+      sourceRefParsing: ${{ibridge.httprequest}}
+      sourceRef: 
+        authorization: ${{startEvent.Authorization}}
+        body: ${{startEvent.Body}}
+      targetRef: 
+        - condition_0
+      worker : ibridge-middleware
+
+    condition_0:
+      type: conditional
+      condition: 
+        variableCheck: 
+          - ${{create_ipassport.message}}
+        value:
+          - case:
+            - Success
+            target: registration_by_step
+      defaultTasK: ibridge-reply
+
+    registration_by_step:
+      type: worker
+      sourceRefParsing: ${{ibridge.httprequest}}
+      sourceRef: 
+        authorization: ${{startEvent.Authorization}}
+        body: ${{create_ipassport.data}}
+      targetRef: 
+        - ibridge-reply
+      worker : kyc
+   
+    ibridge-reply:
+      endParsing: Merged
+      sourceRef: 
+        - ${{registration_by_step}}
+      type: endEvent
+      taskRef: ibridge-reply

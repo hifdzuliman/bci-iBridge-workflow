@@ -1,0 +1,72 @@
+#
+#
+#
+
+name: ocr_ktp
+requestType: ocr_ktp
+path: /ibridge/middleware/ocr/ktp
+method: POST
+startEvent:
+  targetRef: id_forgery
+
+serviceTask:
+  id_forgery:
+    type: worker
+    sourceRef: 
+      - startEvent
+    targetRef: 
+    - condition_0
+    retry: 0
+    worker : ibridge-middleware
+
+  condition_0:
+    type: conditional
+    sourceRef: 
+      -  id_forgery
+    targetRef: 
+      - ocr_ktp
+    condition: 
+      id_forgery:
+        message: Success
+    defaultTasK: ibridge-reply
+
+  ocr_ktp:
+    type: worker
+    sourceRef: 
+      - startEvent
+      - id_forgery
+    targetRef: 
+    - condition_1
+    retry: 0
+    worker : ibridge-middleware
+
+  condition_1:
+    type: conditional
+    sourceRef: 
+      -  ocr_ktp
+    targetRef: 
+      - upload_ktp_minio
+    condition: 
+      ocr_ktp:
+        message: Success
+    defaultTasK: ibridge-reply
+  
+  upload_ktp_minio:
+    type: worker
+    sourceRef: 
+      - startEvent
+      - id_forgery
+      - ocr_ktp
+    targetRef: 
+      - ibridge-reply
+    retry: 0
+    worker: custom_worker
+   
+  ibridge-reply:
+    sourceRef: 
+      - startEvent
+      - id_forgery
+      - ocr_ktp
+      - upload_ktp_minio
+    type: endEvent
+    taskRef: ibridge-reply

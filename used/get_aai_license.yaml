@@ -1,0 +1,27 @@
+#
+#
+#
+
+name: get_aai_license
+requestType: get_aai_license
+path: /ibridge/middleware/get/aailicense
+method: POST
+startEvent:
+  targetRef: get_aai_license
+
+serviceTask:
+  get_aai_license:
+    type: worker
+    sourceRef: 
+      - startEvent
+    targetRef: 
+    - ibridge-reply
+    retry: 0
+    worker : ibridge-middleware
+   
+  ibridge-reply:
+    sourceRef: 
+      - startEvent
+      - get_aai_license
+    type: endEvent
+    taskRef: ibridge-reply

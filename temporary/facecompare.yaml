@@ -1,0 +1,27 @@
+#
+#
+#
+
+name: face_compare
+requestType: face_compare
+path: /ibridge/middleware/aai/facecompare
+method: POST
+startEvent:
+  targetRef: face_compare
+
+serviceTask:
+  face_compare:
+    type: worker
+    sourceRef: 
+      - startEvent
+    targetRef: 
+    - ibridge-reply
+    retry: 0
+    worker : ibridge-middleware
+   
+  ibridge-reply:
+    sourceRef: 
+      - startEvent
+      - face_compare
+    type: endEvent
+    taskRef: ibridge-reply

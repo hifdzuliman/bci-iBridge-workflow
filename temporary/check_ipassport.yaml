@@ -1,0 +1,27 @@
+#
+#
+#
+
+name: check_ipassport
+requestType: check_ipassport
+path: /ibridge/middleware/ipassport/check
+method: POST
+startEvent:
+  targetRef: check_ipassport
+
+serviceTask:
+  check_ipassport:
+    type: worker
+    sourceRef: 
+      - startEvent
+    targetRef: 
+    - ibridge-reply
+    retry: 0
+    worker : ibridge-middleware
+   
+  ibridge-reply:
+    sourceRef: 
+      - startEvent
+      - check_ipassport
+    type: endEvent
+    taskRef: ibridge-reply

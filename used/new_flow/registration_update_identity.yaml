@@ -1,0 +1,111 @@
+  #
+  #
+  #
+
+  name: registration_update_identity
+  requestType: registration_update_identity
+  path: /ibridge/custom/registration/updateidentity
+  method: POST
+  startEvent:
+    targetRef: check_duplicate_nik
+
+  serviceTask:
+    check_duplicate_nik:
+      type: worker
+      sourceRefParsing: ${{ibridge.httprequest}}
+      sourceRef: 
+        body: ${{startEvent.Body}}
+      targetRef: 
+        - condition_0
+      worker : ibridge-middleware
+
+    condition_0:
+      type: conditional
+      condition: 
+        variableCheck: 
+          - ${{check_duplicate_nik.message}}
+        value:
+          - case:
+            - Success
+            target: face_compare
+      defaultTasK: ibridge-reply
+
+    face_compare:
+      type: worker
+      sourceRefParsing: ${{ibridge.httprequest}}
+      sourceRef: 
+        body: 
+          - ${{check_duplicate_nik.data}}
+      targetRef: 
+        - condition_1
+      worker : ibridge-middleware
+
+    condition_1:
+      type: conditional
+      condition: 
+        variableCheck: 
+          - ${{face_compare.message}}
+        value:
+          - case:
+            - Success
+            target: check_high_risk
+      defaultTasK: ibridge-reply
+
+    check_high_risk:
+      type: worker
+      sourceRefParsing: ${{ibridge.httprequest}}
+      sourceRef: 
+        body: 
+          - ${{face_compare.data}}
+      targetRef: 
+        - condition_2
+      worker : ibridge-middleware
+
+    condition_2:
+      type: conditional
+      condition: 
+        variableCheck: 
+          - ${{check_high_risk.message}}
+        value:
+          - case:
+            - Success
+            target: check_dukcapil
+      defaultTasK: ibridge-middleware
+
+    check_dukcapil:
+      type: worker
+      sourceRefParsing: ${{ibridge.httprequest}}
+      sourceRef: 
+        body: 
+          - ${{check_high_risk.data}}
+      targetRef: 
+        - condition_3
+      worker : ibridge-middleware
+
+    condition_3:
+      type: conditional
+      condition: 
+        variableCheck: 
+          - ${{check_dukcapil.message}}
+        value:
+          - case:
+            - Success
+            target: registration_update
+      defaultTasK: ibridge-middleware
+
+    registration_update:
+      type: worker
+      sourceRefParsing: ${{ibridge.httprequest}}
+      sourceRef: 
+        body: 
+          - ${{check_dukcapil.data}}
+      targetRef: 
+        - ibridge-reply
+      worker : kyc
+
+    ibridge-reply:
+      endParsing: Merged
+      sourceRef: 
+        - ${{registration_update}}
+      type: endEvent
+      taskRef: ibridge-reply

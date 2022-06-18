@@ -1,0 +1,60 @@
+#
+#
+#
+
+name: send_otp
+requestType: send_otp
+path: /ibridge/custom/otp/send
+method: POST
+startEvent:
+  targetRef: check_duplicate_phone
+
+serviceTask:
+  check_duplicate_phone:
+    type: worker
+    sourceRef: 
+      - startEvent
+    targetRef: 
+    - condition_0
+    retry: 0
+    worker : ibridge-middleware
+
+  condition_0:
+    type: conditional
+    sourceRef: 
+      -  check_duplicate_phone
+    targetRef: 
+      - send_otp
+    condition: 
+      check_duplicate_phone:
+        message: Success
+    defaultTasK: ibridge-reply
+
+  send_otp:
+    type: worker
+    sourceRef: 
+      - startEvent
+      - check_duplicate_phone
+    targetRef: 
+    - condition_1
+    retry: 0
+    worker : kyc
+
+  condition_1:
+    type: conditional
+    sourceRef: 
+      -  send_otp
+    targetRef: 
+      - ibridge-reply
+    condition: 
+      send_otp:
+        message: Success
+    defaultTasK: ibridge-reply
+   
+  ibridge-reply:
+    sourceRef: 
+      - startEvent
+      - check_duplicate_phone
+      - send_otp
+    type: endEvent
+    taskRef: ibridge-reply

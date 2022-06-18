@@ -1,0 +1,49 @@
+#
+#
+#
+
+name: registration_step
+requestType: registration_step
+path: /ibridge/custom/registration/step
+method: POST
+startEvent:
+  targetRef: create_ipassport
+
+serviceTask:
+  create_ipassport:
+    type: worker
+    sourceRef: 
+      - startEvent
+    targetRef: 
+    - condition_0
+    retry: 0
+    worker : ibridge-middleware
+
+  condition_0:
+    type: conditional
+    sourceRef: 
+      -  create_ipassport
+    targetRef: 
+      - registration_step
+    condition: 
+      create_ipassport:
+        message: Success
+    defaultTasK: ibridge-reply
+
+  registration_step:
+    type: worker
+    sourceRef: 
+      - startEvent
+      - create_ipassport
+    targetRef: 
+    - condition_1
+    retry: 0
+    worker : ibridge-middleware
+   
+  ibridge-reply:
+    sourceRef: 
+      - startEvent
+      - create_ipassport
+      - registration_step
+    type: endEvent
+    taskRef: ibridge-reply

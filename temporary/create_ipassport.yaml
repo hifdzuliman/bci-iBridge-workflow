@@ -1,0 +1,27 @@
+#
+#
+#
+
+name: create_ipassport
+requestType: create_ipassport
+path: /ibridge/middleware/ipassport/create
+method: POST
+startEvent:
+  targetRef: create_ipassport
+
+serviceTask:
+  create_ipassport:
+    type: worker
+    sourceRef: 
+      - startEvent
+    targetRef: 
+    - ibridge-reply
+    retry: 0
+    worker : ibridge-middleware
+   
+  ibridge-reply:
+    sourceRef: 
+      - startEvent
+      - create_ipassport
+    type: endEvent
+    taskRef: ibridge-reply

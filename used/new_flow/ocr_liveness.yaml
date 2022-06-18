@@ -1,0 +1,27 @@
+#
+#
+#
+
+name: ocr_liveness
+requestType: ocr_liveness
+path: /ibridge/middleware/ocr/liveness
+method: POST
+startEvent:
+  targetRef: upload_liveness_minio
+
+serviceTask:  
+  upload_liveness_minio:
+    type: worker
+    sourceRefParsing: ${{ibridge.httprequest}}
+    sourceRef: 
+      body: ${{startEvent.Body}}
+    targetRef: 
+      - ibridge-reply
+    worker: custom_worker
+   
+  ibridge-reply:
+    endParsing: Merged
+    sourceRef: 
+      - ${{upload_liveness_minio}}
+    type: endEvent
+    taskRef: ibridge-reply

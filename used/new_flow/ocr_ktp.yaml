@@ -1,0 +1,78 @@
+#
+#
+#
+
+name: ocr_ktp
+requestType: ocr_ktp
+path: /ibridge/middleware/ocr/ktp
+method: POST
+startEvent:
+  targetRef: id_forgery
+
+serviceTask:
+  id_forgery:
+    type: worker
+    sourceRefParsing: ${{ibridge.httprequest}}
+    sourceRef: 
+      formFile:
+        - ${{startEvent.FormFile.ocr_ktp}}
+      formValue:
+        - ${{startEvent.FormValue.ocr_ktp}}
+    targetRef: 
+    - condition_0
+    worker : ibridge-middleware
+
+  condition_0:
+    type: conditional
+    condition: 
+      variableCheck: 
+        - ${{id_forgery.message}}
+      value:
+        - case:
+          - Success
+          target: ocr_ktp
+    defaultTasK: ibridge-reply
+
+  ocr_ktp:
+    type: worker
+    sourceRefParsing: ${{ibridge.httprequest}}
+    sourceRef: 
+      formFile:
+        - ${{startEvent.FormFile.ocr_ktp}}
+      formValue:
+        - ${{startEvent.FormValue.ocr_ktp}}
+    targetRef: 
+    - condition_1
+    worker : ibridge-middleware
+
+  condition_1:
+    type: conditional
+    condition: 
+      variableCheck: 
+        - ${{ocr_ktp.message}}
+      value:
+        - case:
+          - Success
+          target: upload_ktp_minio
+    defaultTasK: ibridge-reply
+    
+  upload_ktp_minio:
+    type: worker
+    sourceRefParsing: ${{ibridge.httprequest}}
+    sourceRef: 
+      formFile:
+        - ${{startEvent.FormFile.ocr_ktp}}
+      formValue:
+        - ${{startEvent.FormValue.ocr_ktp}}
+    targetRef: 
+    - ibridge-reply
+    worker : custom_worker
+  
+  ibridge-reply:
+    endParsing: Separated
+    sourceRef: 
+      id_forgery: ${{id_forgery.data.id_forgery}}
+      ocr_ktp: ${{ocr_ktp.data.ocr_ktp}}
+      upload_ktp_minio: ${{upload_ktp_minio.data.upload_ktp_minio}}
+    type: endEvent
+    taskRef: ibridge-reply

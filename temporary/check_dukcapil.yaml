@@ -1,0 +1,27 @@
+#
+#
+#
+
+name: check_dukcapil
+requestType: check_dukcapil
+path: /ibridge/middleware/check/dukcapil
+method: POST
+startEvent:
+  targetRef: check_dukcapil
+
+serviceTask:
+  check_dukcapil:
+    type: worker
+    sourceRef: 
+      - startEvent
+    targetRef: 
+    - ibridge-reply
+    retry: 0
+    worker : ibridge-middleware
+   
+  ibridge-reply:
+    sourceRef: 
+      - startEvent
+      - check_dukcapil
+    type: endEvent
+    taskRef: ibridge-reply

@@ -1,0 +1,121 @@
+#
+#
+#
+
+name: registration_update_identity
+requestType: registration_update_identity
+path: /ibridge/custom/registration/updateidentity
+method: POST
+startEvent:
+  targetRef: check_duplicate_nik
+
+serviceTask:
+  check_duplicate_nik:
+    type: worker
+    sourceRef: 
+      - startEvent
+    targetRef: 
+    - condition_0
+    retry: 0
+    worker : ibridge-middleware
+
+  condition_0:
+    type: conditional
+    sourceRef: 
+      -  check_duplicate_nik
+    targetRef: 
+      - check_high_risk
+    condition: 
+      check_duplicate_nik:
+        message: Success
+    defaultTasK: ibridge-reply
+
+  face_compare:
+    type: worker
+    sourceRef: 
+      - startEvent
+    targetRef: 
+    - condition_1
+    retry: 0
+    worker : ibridge-middleware
+
+  condition_1:
+    type: conditional
+    sourceRef: 
+      -  face_compare
+    targetRef: 
+      - check_high_risk
+    condition: 
+      face_compare:
+        message: Success
+    defaultTasK: ibridge-reply
+  
+  check_high_risk:
+    type: worker
+    sourceRef: 
+      - startEvent
+      - check_duplicate_nik
+      - face_compare
+    targetRef: 
+      - condition_2
+    retry: 0
+    worker: ibridge-middleware
+
+  condition_2:
+    type: conditional
+    sourceRef: 
+      -  check_high_risk
+    targetRef: 
+      - check_dukcapil
+    condition: 
+      check_high_risk:
+        message: Success
+    defaultTasK: ibridge-reply
+  
+  check_dukcapil:
+    type: worker
+    sourceRef: 
+      - startEvent
+      - check_duplicate_nik
+      - face_compare
+      - check_high_risk
+    targetRef: 
+      - condition_3
+    retry: 0
+    worker: ibridge-middleware
+
+  condition_3:
+    type: conditional
+    sourceRef: 
+      -  check_dukcapil
+    targetRef: 
+      - registration_update
+    condition: 
+      check_dukcapil:
+        message: Success
+    defaultTasK: ibridge-reply
+
+  registration_update:
+    type: worker
+    sourceRef: 
+      - startEvent
+      - check_duplicate_nik
+      - face_compare
+      - check_high_risk
+      - check_dukcapil
+    targetRef: 
+      - ibridge-reply
+    retry: 0
+    worker: kyc
+   
+  ibridge-reply:
+    sourceRef: 
+      - startEvent
+      - check_duplicate_nik
+      - face_compare
+      - inquiry_account_by_cif
+      - check_high_risk
+      - check_dukcapil
+      - registration_update
+    type: endEvent
+    taskRef: ibridge-reply
